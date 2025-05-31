@@ -1,9 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback} from 'react';
 
-// Define interfaces for data (assuming these are unchanged)
-type Participant = { name: string; email?: string };
-type TAInfo = { id: number; name: string };
-
 
 interface ApiStudentEntry {
   name: string;
@@ -15,9 +11,9 @@ interface ApiStudentEntry {
   fb?: number;
   fc?: number;
   fd?: number;
-  bonus_attendance?: string; // 'yes' or 'no'
-  bonus_answer_quality?: string; // 'yes' or 'no'
-  bonus_follow_up?: string; // 'yes' or 'no'
+  bonus_attempt?: number; // 'yes' or 'no'
+  bonus_answer_quality?: number; // 'yes' or 'no'
+  bonus_follow_up?: number; // 'yes' or 'no'
   exercise_submitted?: string; // 'yes' or 'no'
   exercise_test_passing?: string; // 'yes' or 'no'
   exercise_good_documentation?: string; // 'yes' or 'no'
@@ -35,7 +31,7 @@ interface TableRowData {
   ta: string;
   attendance: boolean;
   gdScore: { fa: number; fb: number; fc: number; fd: number };
-  bonusScore: { attempt: boolean; good: boolean; followUp: boolean };
+  bonusScore: { attempt: number; good: number; followUp: number };
   exerciseScore: { Submitted: boolean; privateTest: boolean; goodStructure: boolean; goodDoc: boolean };
   week?: number;
   total: number;
@@ -65,7 +61,7 @@ const computeGdTotal = (gd: TableRowData['gdScore']): number =>
   (30 / 5) * gd.fa + (30 / 5) * gd.fb + (20 / 5) * gd.fc + (20 / 5) * gd.fd;
 
 const computeBonusTotal = (b: TableRowData['bonusScore']): number =>
-  (b.attempt ? 10 : 0) + (b.good ? 30 : 0) + (b.followUp ? 10 : 0);
+ (10 / 5) * b.attempt + (10 / 5) * b.good + (10 / 5) * b.followUp;
 
 const computeExerciseTotal = (e: TableRowData['exerciseScore']): number =>
   (e.Submitted ? 10 : 0) +
@@ -105,9 +101,9 @@ const computeTotal = (p: TableRowData): number =>
             fd: person.fd || 0,
           };
           const bonusScore = {
-            attempt: person.bonus_attendance === 'yes',
-            good: person.bonus_answer_quality === 'yes',
-            followUp: person.bonus_follow_up === 'yes',
+            attempt: person.bonus_attempt || 0,
+            good: person.bonus_answer_quality || 0,
+            followUp: person.bonus_follow_up || 0,
           };
           const exerciseScore = {
             Submitted: person.exercise_submitted === 'yes',
@@ -221,8 +217,8 @@ const [totalCount, setTotalCount] = useState<number | null>(null);
   };
   const handleGdScoreChange = (id: number, key: keyof TableRowData['gdScore'], v: string) =>
     setData(d => d.map(p => p.id === id ? { ...p, gdScore: { ...p.gdScore, [key]: parseInt(v) || 0 } } : p));
-  const handleBonusScoreChange = (id: number, key: keyof TableRowData['bonusScore']) =>
-    setData(d => d.map(p => p.id === id ? { ...p, bonusScore: { ...p.bonusScore, [key]: !p.bonusScore[key] } } : p));
+  const handleBonusScoreChange = (id: number, key: keyof TableRowData['bonusScore'], v: string) =>
+    setData(d => d.map(p => p.id === id ? { ...p, bonusScore: { ...p.bonusScore, [key]: parseInt(v) || 0 } } : p));
   const handleExerciseScoreChange = (id: number, key: keyof TableRowData['exerciseScore']) =>
     setData(d => d.map(p => p.id === id ? { ...p, exerciseScore: { ...p.exerciseScore, [key]: !p.exerciseScore[key] } } : p));
 
@@ -246,8 +242,8 @@ const [totalCount, setTotalCount] = useState<number | null>(null);
     const payload = data.map(p => ({
       name: p.name, mail: p.email, attendance: p.attendance ? 'yes' : 'no', week:week,
       group_id: p.group, ta: p.ta, fa: p.gdScore.fa, fb: p.gdScore.fb, fc: p.gdScore.fc, fd: p.gdScore.fd,
-      bonus_attendance: p.bonusScore.attempt ? 'yes' : 'no', bonus_answer_quality: p.bonusScore.good ? 'yes' : 'no',
-      bonus_follow_up: p.bonusScore.followUp ? 'yes' : 'no', exercise_submitted: p.exerciseScore.Submitted ? 'yes' : 'no',
+      bonus_attempt: p.bonusScore.attempt, bonus_answer_quality: p.bonusScore.good,
+      bonus_follow_up: p.bonusScore.followUp, exercise_submitted: p.exerciseScore.Submitted ? 'yes' : 'no',
       exercise_test_passing: p.exerciseScore.privateTest ? 'yes' : 'no', exercise_good_documentation: p.exerciseScore.goodDoc ? 'yes' : 'no',
       exercise_good_structure: p.exerciseScore.goodStructure ? 'yes' : 'no', total: computeTotal(p)
     }));
@@ -454,9 +450,11 @@ const [totalCount, setTotalCount] = useState<number | null>(null);
 
                     {(['attempt', 'good', 'followUp'] as const).map(key => (
                       <td key={key} className="px-3 py-4 whitespace-nowrap text-center text-sm">
-                        <input type="checkbox" checked={person.bonusScore[key]} disabled={!canEditFields}
-                          onChange={() => handleBonusScoreChange(person.id, key)}
-                          className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 disabled:cursor-not-allowed"/>
+                      <select value={person.bonusScore[key]} disabled={!canEditFields}
+                          onChange={e => handleBonusScoreChange(person.id, key, e.target.value)}
+                          className="border border-gray-300 rounded-md shadow-sm p-1 text-sm focus:ring-indigo-500 focus:border-indigo-500 disabled:cursor-not-allowed">
+                          {[0, 1, 2, 3, 4, 5].map(val => (<option key={val} value={val}>{val === 0 ? '-' : val}</option>))}
+                        </select>
                       </td>
                     ))}
                     {(['Submitted', 'privateTest', 'goodStructure', 'goodDoc'] as const).map(key => (

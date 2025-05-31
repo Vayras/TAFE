@@ -1,54 +1,43 @@
-# React + TypeScript + Vite
+### Backend Setup
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+1.  **Clone the backend repository:**
+    ```bash
+    git clone [https://github.com/Vayras/ta_backend.git](https://github.com/Vayras/ta_backend.git)
+    cd ta_backend
+    ```
 
-Currently, two official plugins are available:
+2.  **Run database migrations:**
+    This command will set up the necessary database schema using SQLite.
+    ```bash
+    cargo run --bin migrate
+    ```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+3.  **Run the backend server:**
+    This command will start the backend application with informational logging.
+    ```bash
+    RUST_LOG=info cargo run
+    ```
+    The backend server will typically be running on a port like `localhost:8000` (or as specified in your backend configuration).
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Frontend Setup
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+1.  **Clone the frontend repository:**
+    Open a new terminal window or navigate to a different directory for the frontend.
+    ```bash
+    git https://github.com/Vayras/TAFE.git
+    cd TAFE
+    ```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+2.  **Install frontend dependencies:**
+    ```bash
+    npm install
+    ```
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+3.  **Run the frontend development server:**
+    ```bash
+    npm run dev
+    ```
+    This will usually start a development server, often on a port like `localhost:3000` or `localhost:5173` (Vite default). Check your terminal output for the exact address.
